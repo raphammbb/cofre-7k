@@ -33,6 +33,7 @@ async function derive(pw) {
   return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(M.salt), iterations: M.iter, hash: "SHA-256" }, k, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
 }
 async function unlock(pw) {
+  if (typeof DecompressionStream === "undefined") throw new Error("ios");
   KEY = await derive(pw);
   const c = await (await fetch(M.baseA + "c/check.e")).arrayBuffer();
   const ok = new TextDecoder().decode(await decrypt(new Uint8Array(c)));   // lança erro se a senha estiver errada
@@ -52,7 +53,7 @@ const form = document.getElementById("gf"), pw = document.getElementById("gpw"),
 async function tryPw(v, silent) {
   btn.disabled = true; err.textContent = silent ? "" : "Abrindo…";
   try { await unlock(v); try { sessionStorage.setItem("p", v); } catch (e) {} }
-  catch (e) { btn.disabled = false; err.textContent = silent ? "" : (e && /senha|operation|decrypt/i.test(String(e)) || e.name === "OperationError" ? "Senha incorreta." : "Não consegui abrir. Tente de novo."); pw.select(); }
+  catch (e) { btn.disabled = false; err.textContent = silent ? "" : (String(e).includes("ios") ? "Seu navegador é antigo. Atualize o iPhone/navegador e tente de novo." : (e && /senha|operation|decrypt/i.test(String(e)) || e.name === "OperationError" ? "Senha incorreta." : "Não consegui abrir. Tente de novo.")); pw.select(); }
 }
 form.addEventListener("submit", e => { e.preventDefault(); if (!pepper()) { err.textContent = "Abra pelo link completo que foi enviado."; return; } if (pw.value) tryPw(pw.value, false); });
 try { const s = sessionStorage.getItem("p"); if (s) tryPw(s, true); } catch (e) {}
