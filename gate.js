@@ -5,7 +5,7 @@ const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const MIME = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif", mp4: "video/mp4", mov: "video/mp4", mp3: "audio/mpeg", m4a: "audio/mp4" };
 const GZ = p => /\.(js|css|html)$/i.test(p);
 let KEY = null;
-const urlOf = p => (p.startsWith("audio/") ? M.baseB + "a/" + p.slice(6) : M.baseA + "c/" + p) + ".e";
+const urlOf = p => (p.startsWith("audio/") ? M.baseB + "a/" + p.slice(6) : M.baseA + "c/" + p) + ".e" + (GZ(p) ? "?v=" + M.v : "");   // ?v= evita código/dados velhos em cache depois de uma atualização
 const decrypt = async buf => new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: buf.slice(0, 12) }, KEY, buf.slice(12)));
 async function raw(p) { const r = await fetch(urlOf(p)); if (!r.ok) throw new Error(p + " " + r.status); return decrypt(new Uint8Array(await r.arrayBuffer())); }
 async function gunzip(u8) { return new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer(); }
@@ -35,7 +35,7 @@ async function derive(pw) {
 async function unlock(pw) {
   if (typeof DecompressionStream === "undefined") throw new Error("ios");
   KEY = await derive(pw);
-  const c = await (await fetch(M.baseA + "c/check.e")).arrayBuffer();
+  const c = await (await fetch(M.baseA + "c/check.e?v=" + M.v)).arrayBuffer();
   const ok = new TextDecoder().decode(await decrypt(new Uint8Array(c)));   // lança erro se a senha estiver errada
   if (ok !== "ok") throw new Error("senha");
   window.DEC = { url, text, script };
