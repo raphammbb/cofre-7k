@@ -46,7 +46,7 @@ async function unlock(pw) {
   document.title = "Nossa história";
   document.body.innerHTML = html;
   watch();
-  for (const p of ["data/months.js", "data/stats.js", "data/moments.js", "data/feitos.js", "data/fotos.js", "data/vozes.js", "js/app.js", "js/extra.js", "js/story.js"]) await script(p);
+  for (const p of ["data/months.js", "data/stats.js", "data/moments.js", "data/feitos.js", "data/fotos.js", "data/vozes.js", "data/palavras.js", "js/app.js", "js/extra.js", "js/story.js"]) await script(p);
 }
 
 const form = document.getElementById("gf"), pw = document.getElementById("gpw"), btn = document.getElementById("gbtn"), err = document.getElementById("gerr");
